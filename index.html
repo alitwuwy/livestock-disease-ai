@@ -86,6 +86,12 @@
                 <button type="submit" class="btn btn-primary btn-full">
                     <i class="fas fa-sign-in-alt"></i> تسجيل الدخول
                 </button>
+                <button type="button" class="btn btn-secondary btn-full" onclick="loginUser(username.value, password.value)" style="margin-top: 0.5rem;">
+                    <i class="fas fa-sign-in-alt"></i> تسجيل الدخول Firebase
+                </button>
+                <button type="button" class="btn btn-success btn-full" onclick="registerUser(username.value, password.value)" style="margin-top: 0.5rem;">
+                    <i class="fas fa-user-plus"></i> إنشاء حساب
+                </button>
             </form>
             <p style="margin-top: 1.5rem; font-size: 0.85rem; color: var(--text-secondary);">
                 للتصفح كزائر <a href="#" onclick="showPublicPage()" style="color: var(--accent);">اضغط هنا</a>
