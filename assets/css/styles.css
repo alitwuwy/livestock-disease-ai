@@ -605,6 +605,63 @@ footer {
     .footer-content { grid-template-columns: 1fr; }
     nav ul { display: none; }
     .hero-stats { gap: 1rem; }
+    
+    /* Mobile Menu Button */
+    .mobile-menu-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 45px;
+        height: 45px;
+        background: var(--primary);
+        border: none;
+        border-radius: 8px;
+        color: white;
+        font-size: 1.2rem;
+        cursor: pointer;
+        margin-left: 10px;
+    }
+    
+    .mobile-menu-btn:hover {
+        background: var(--primary-dark);
+    }
+    
+    /* Mobile Nav - Show when toggled */
+    nav.mobile-open ul {
+        display: flex !important;
+        flex-direction: column;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: var(--primary);
+        padding: 1rem;
+        z-index: 1000;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+    
+    nav.mobile-open ul li {
+        width: 100%;
+    }
+    
+    nav.mobile-open ul li a {
+        display: block;
+        padding: 12px 15px;
+        border-radius: 6px;
+    }
+    
+    /* Header mobile adjustments */
+    .header-content {
+        flex-wrap: wrap;
+    }
+    
+    .user-info {
+        margin-right: auto;
+    }
+    
+    .logout-btn span {
+        display: none;
+    }
     .stat-number { font-size: 1.5rem; }
     .user-details { display: none; }
     .logout-btn span { display: none; }

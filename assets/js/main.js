@@ -489,6 +489,14 @@ function showPublicPage() {
     applyPermissions();
 }
 
+// Toggle mobile menu
+function toggleMobileMenu() {
+    const nav = document.getElementById('mainNav');
+    if (nav) {
+        nav.classList.toggle('mobile-open');
+    }
+}
+
 // Show section
 function showSection(sectionId) {
     // Check permissions first
