@@ -1,3 +1,4 @@
+
 // راصد - نظام رصد الأمراض البيطرية بالذكاء الاصطناعي
 // Main JavaScript with Permissions System
 
@@ -152,7 +153,8 @@ function initializeUsers() {
             { id: 1, name: 'علي غالب', username: 'admin', password: 'admin123', role: 'admin', status: 'active', date: '2024-01-01' },
             { id: 2, name: 'محمد علي', username: 'manager', password: 'manager123', role: 'manager', status: 'active', date: '2024-01-15' },
             { id: 3, name: 'سارة كريم', username: 'super', password: 'super123', role: 'supervisor', status: 'active', date: '2024-02-01' },
-            { id: 4, name: 'خالد عمر', username: 'user1', password: 'user123', role: 'supervisor', status: 'active', date: '2024-03-01' }
+            { id: 4, name: 'خالد عمر', username: 'user1', password: 'user123', role: 'supervisor', status: 'active', date: '2024-03-01' },
+            { id: 5, name: 'فاطمة محمد', username: 'fatima', password: '1511', role: 'supervisor', status: 'active', date: '2024-03-15' }
         ]));
     }
 }
