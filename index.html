@@ -35,6 +35,34 @@
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const analytics = getAnalytics(app);
+        
+        // Firebase Authentication
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } 
+        from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+        const auth = getAuth();
+
+        // إنشاء حساب
+        window.registerUser = function(email, password) {
+            createUserWithEmailAndPassword(auth, email, password)
+            .then((userCredential) => {
+                alert("تم إنشاء الحساب بنجاح");
+            })
+            .catch((error) => {
+                alert(error.message);
+            });
+        };
+
+        // تسجيل الدخول
+        window.loginUser = function(email, password) {
+            signInWithEmailAndPassword(auth, email, password)
+            .then((userCredential) => {
+                alert("تم تسجيل الدخول");
+            })
+            .catch((error) => {
+                alert(error.message);
+            });
+        };
     </script>
 </head>
 <body>
