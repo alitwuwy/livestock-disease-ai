@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EagleVET - نظام رصد الأمراض البيطرية بالذكاء الاصطناعي</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- Login Page -->
+    <div id="loginPage" class="login-container">
+        <div class="login-box">
+            <div class="login-logo">
+                <i class="fas fa-shield-virus"></i>
+            </div>
+<h1 class="login-title">EagleVET</h1>
+            <p class="login-subtitle">نظام رصد الأمراض البيطرية بالذكاء الاصطناعي في العراق</p>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label class="form-label">اسم المستخدم</label>
+                    <input type="text" class="form-input" id="username" placeholder="أدخل اسم المستخدم" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">كلمة المرور</label>
+                    <input type="password" class="form-input" id="password" placeholder="أدخل كلمة المرور" required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-full">
+                    <i class="fas fa-sign-in-alt"></i> تسجيل الدخول
+                </button>
+            </form>
+            <p style="margin-top: 1.5rem; font-size: 0.85rem; color: var(--text-secondary);">
+                للتصفح كزائر <a href="#" onclick="showPublicPage()" style="color: var(--accent);">اضغط هنا</a>
+            </p>
+            <p style="margin-top: 1rem; font-size: 0.75rem; color: var(--text-secondary);">
+                الحسابات الافتراضية:<br>
+علي غالب / admin123<br>
+                manager / manager123
+            </p>
+        </div>
+    </div>
+
+    <!-- Main Application -->
+    <div id="mainApp" class="hidden">
+        <header>
+            <div class="header-content">
+                <a href="#home" class="logo" onclick="showSection('home')">
+                    <div class="logo-icon">
+                        <i class="fas fa-shield-virus"></i>
+                    </div>
+                    <div>
+<div class="logo-text">EagleVET</div>
+                        <div class="logo-subtitle">رصد الأمراض البيطرية</div>
+                    </div>
+                </a>
+                
+                <nav id="mainNav">
+                    <ul>
+                        <li><a href="#home" onclick="showSection('home')" id="nav-home" class="active"><i class="fas fa-home"></i> الرئيسية</a></li>
+                        <li><a href="#stats" onclick="showSection('stats')" id="nav-stats"><i class="fas fa-chart-bar"></i> الإحصائيات</a></li>
+                        <li><a href="#diseases" onclick="showSection('diseases')" id="nav-diseases"><i class="fas fa-virus"></i> الأمراض</a></li>
+                        <li><a href="#animals" onclick="showSection('animals')" id="nav-animals"><i class="fas fa-paw"></i> الحيوانات</a></li>
+                        <li><a href="#map" onclick="showSection('map')" id="nav-map"><i class="fas fa-map-marked-alt"></i> الخريطة</a></li>
+                        <li><a href="#report" onclick="showSection('report')" id="nav-report"><i class="fas fa-file-medical"></i> البلاغات</a></li>
+                        <li><a href="#analyzer" onclick="showSection('analyzer')" id="nav-analyzer"><i class="fas fa-robot"></i> الذكاء الاصطناعي</a></li>
+                        <li><a href="#vets" onclick="showSection('vets')" id="nav-vets"><i class="fas fa-user-md"></i> البيطريين</a></li>
+<li id="nav-users-link" style="display:none;"><a href="#users" onclick="showSection('users')" id="nav-users"><i class="fas fa-users"></i> المستخدمين</a></li>
+                        <li><a href="#diseases-study" onclick="showSection('diseases-study')" id="nav-diseases-study"><i class="fas fa-book-medical"></i> دراسة الأمراض</a></li>
+                        <li id="nav-settings-link" style="display:none;"><a href="#settings" onclick="showSection('settings')" id="nav-settings"><i class="fas fa-cog"></i> الإعدادات</a></li>
+                    </ul>
+                </nav>
+                
+                <div class="user-info">
+                    <div class="user-details">
+                        <span id="displayUsername">مدير النظام</span>
+                        <span id="userRole" class="role-badge-small">مدير نظام</span>
+                    </div>
+                    <div class="user-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <button class="logout-btn" onclick="logout()">
+                        <i class="fas fa-sign-out-alt"></i> <span>خروج</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <main id="mainContent">
+            <!-- Home Section -->
+            <section id="homeSection" class="section-page active">
+                <section class="hero">
+                    <h1>نظام رصد الأمراض البيطرية بالذكاء الاصطناعي</h1>
+                    <p id="heroSubtitle">مرحباً بك في نظام رصد ومتابعة الأمراض البيطرية في العراق</p>
+                    <div class="hero-stats">
+                        <div class="stat-item">
+                            <div class="stat-number" id="totalReports">1,247</div>
+                            <div class="stat-label">إجمالي البلاغات</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number" id="activeOutbreaks">23</div>
+                            <div class="stat-label">تفشي نشط</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number" id="governorates">18</div>
+                            <div class="stat-label">المحافظات</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number" id="aiAnalyses">856</div>
+                            <div class="stat-label">تحليل بالذكاء الاصطناعي</div>
+                        </div>
+                    </div>
+                </section>
+
+                <div class="container">
+                    <!-- Alerts -->
+                    <div id="alerts">
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <span>تحذير: تفشي مرض الحمى القلاعية في محافظة ذي قار - 12 حالة جديدة</span>
+                            <button style="margin-right: auto; background: none; border: none; cursor: pointer;" onclick="this.parentElement.remove()">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            <span>تنبيه: بدء حملة التطعيمات في محافظة نينوى</span>
+                            <button style="margin-right: auto; background: none; border: none; cursor: pointer; color: var(--accent);" onclick="this.parentElement.remove()">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Quick Stats -->
+                    <div class="grid-4" style="margin-bottom: 1.5rem; margin-top: 1.5rem;">
+                        <div class="card stat-card" onclick="showSection('stats')">
+                            <i class="fas fa-chart-pie"></i>
+                            <div>
+                                <div class="stat-num">156</div>
+                                <div>حالات جديدة</div>
+                            </div>
+                        </div>
+                        <div class="card stat-card" onclick="showSection('report')">
+                            <i class="fas fa-file-medical"></i>
+                            <div>
+                                <div class="stat-num">23</div>
+                                <div>تحت العلاج</div>
+                            </div>
+                        </div>
+                        <div class="card stat-card" onclick="showSection('diseases')">
+                            <i class="fas fa-heartbeat"></i>
+                            <div>
+                                <div class="stat-num">1,056</div>
+                                <div>تعافوا</div>
+                            </div>
+                        </div>
+                        <div class="card stat-card" onclick="showSection('map')">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <div>
+                                <div class="stat-num">12</div>
+                                <div>وفيات</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Links & Notifications -->
+                    <div class="grid-2">
+                        <div class="card">
+                            <h3 class="card-title"><i class="fas fa-bolt"></i> روابط سريعة</h3>
+                            <div class="quick-links" style="flex-direction: column;">
+                                <button class="btn btn-primary" onclick="showSection('report')">
+                                    <i class="fas fa-plus"></i> بلاغ جديد
+                                </button>
+                                <button class="btn btn-secondary" onclick="showSection('analyzer')">
+                                    <i class="fas fa-robot"></i> تحليل بالذكاء الاصطناعي
+                                </button>
+                                <button class="btn btn-primary" onclick="showSection('map')">
+                                    <i class="fas fa-map"></i> عرض الخريطة
+                                </button>
+                                <button class="btn btn-secondary" onclick="showSection('animals')">
+                                    <i class="fas fa-paw"></i> تسجيل حيوان
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <h3 class="card-title"><i class="fas fa-bell"></i> آخر الإشعارات</h3>
+                            <div class="notification-list">
+                                <div class="notification-item">
+                                    <i class="fas fa-exclamation-circle" style="color: var(--error);"></i>
+                                    <div>
+                                        <strong>تفشي جديد</strong>
+                                        <p>مرض الحمى القلاعية في ذي قار</p>
+                                        <small>منذ 2 ساعة</small>
+                                    </div>
+                                </div>
+                                <div class="notification-item">
+                                    <i class="fas fa-user-plus" style="color: var(--success);"></i>
+                                    <div>
+                                        <strong>مستخدم جديد</strong>
+                                        <p>تم إضافة طبيب بيطري جديد</p>
+                                        <small>منذ 5 ساعة</small>
+                                    </div>
+                                </div>
+                                <div class="notification-item">
+                                    <i class="fas fa-check-circle" style="color: var(--primary);"></i>
+                                    <div>
+                                        <strong>حالة تعافت</strong>
+                                        <p>تعافت 5 حالات من الجرب</p>
+                                        <small>منذ 1 يوم</small>
+                                    </div>
+                                </div>
+                                <div class="notification-item">
+                                    <i class="fas fa-chart-line" style="color: var(--accent);"></i>
+                                    <div>
+                                        <strong>تقرير أسبوعي</strong>
+                                        <p>انخفاض في نسبة التفشي 15%</p>
+                                        <small>منذ 2 يوم</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Statistics Section -->
+            <section id="statsSection" class="section-page">
+                <div class="container">
+                    <h2 class="section-title"><i class="fas fa-chart-bar"></i> الإحصائيات والتحليلات</h2>
+                    
+                    <!-- Main Stats -->
+                    <div class="grid-4" style="margin-bottom: 1.5rem;">
+                        <div class="card stat-card">
+                            <i class="fas fa-user-plus" style="color: var(--primary);"></i>
+                            <div>
+                                <div class="stat-num">156</div>
+                                <div>حالات جديدة</div>
+                                <small style="color: var(--success);">+12%</small>
+                            </div>
+                        </div>
+                        <div class="card stat-card">
+                            <i class="fas fa-user-injured" style="color: var(--warning);"></i>
+                            <div>
+                                <div class="stat-num">23</div>
+                                <div>تحت العلاج</div>
+                                <small style="color: var(--error);">-5%</small>
+                            </div>
+                        </div>
+                        <div class="card stat-card">
+                            <i class="fas fa-heart" style="color: var(--success);"></i>
+                            <div>
+                                <div class="stat-num">1,056</div>
+                                <div>تعافوا</div>
+                                <small style="color: var(--success);">+8%</small>
+                            </div>
+                        </div>
+                        <div class="card stat-card">
+                            <i class="fas fa-ribbon" style="color: var(--accent);"></i>
+                            <div>
+                                <div class="stat-num">12</div>
+                                <div>وفيات</div>
+                                <small style="color: var(--success);">-3%</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Animal Stats -->
+                    <div class="grid-4" style="margin-bottom: 1.5rem;">
+                        <div class="card stat-card">
+                            <i class="fas fa-cow" style="color: #8D6E63;"></i>
+                            <div>
+                                <div class="stat-num">45,230</div>
+                                <div>أبقار مسجلة</div>
+                            </div>
+                        </div>
+                        <div class="card stat-card">
+                            <i class="fas fa-sheep" style="color: #78909C;"></i>
+                            <div>
+                                <div class="stat-num">32,150</div>
+                                <div>أغنام مسجلة</div>
+                            </div>
+                        </div>
+                        <div class="card stat-card">
+                            <i class="fas fa-paw" style="color: #FF8A65;"></i>
+                            <div>
+                                <div class="stat-num">18,420</div>
+                                <div>ماعز مسجل</div>
+                            </div>
+                        </div>
+                        <div class="card stat-card">
+                            <i class="fas fa-egg" style="color: #FFB74D;"></i>
+                            <div>
+                                <div class="stat-num">125,000</div>
+                                <div>دواجن مسجلة</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Vet Stats -->
+                    <div class="grid-4" style="margin-bottom: 1.5rem;">
+                        <div class="card stat-card">
+                            <i class="fas fa-user-md" style="color: #42A5F5;"></i>
+                            <div>
+                                <div class="stat-num">45</div>
+                                <div>أطباء بيطريين</div>
+                            </div>
+                        </div>
+                        <div class="card stat-card">
+                            <i class="fas fa-hospital" style="color: #66BB6A;"></i>
+                            <div>
+                                <div class="stat-num">12</div>
+                                <div>عيادات بيطرية</div>
+                            </div>
+                        </div>
+                        <div class="card stat-card">
+                            <i class="fas fa-syringe" style="color: #AB47BC;"></i>
+                            <div>
+                                <div class="stat-num">8,540</div>
+                                <div>لقاح مُعطى</div>
+                            </div>
+                        </div>
+                        <div class="card stat-card">
+                            <i class="fas fa-calendar-check" style="color: #26A69A;"></i>
+                            <div>
+                                <div class="stat-num">156</div>
+                                <div>زيارة منزلية</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Report Stats -->
+                    <div class="grid-4" style="margin-bottom: 1.5rem;">
+                        <div class="card stat-card">
+                            <i class="fas fa-file-medical-alt" style="color: #EF5350;"></i>
+                            <div>
+                                <div class="stat-num">1,247</div>
+                                <div>إجمالي البلاغات</div>
+                            </div>
+                        </div>
+                        <div class="card stat-card">
+                            <i class="fas fa-check-circle" style="color: #4CAF50;"></i>
+                            <div>
+                                <div class="stat-num">1,056</div>
+                                <div>بلاغات محلولة</div>
+                            </div>
+                        </div>
+                        <div class="card stat-card">
+                            <i class="fas fa-clock" style="color: #FF9800;"></i>
+                            <div>
+                                <div class="stat-num">156</div>
+                                <div>بلاغات قيد المعالجة</div>
+                            </div>
+                        </div>
+                        <div class="card stat-card">
+                            <i class="fas fa-exclamation-triangle" style="color: #F44336;"></i>
+                            <div>
+                                <div class="stat-num">23</div>
+                                <div>تفشي نشط</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Charts -->
+                    <div class="grid-2">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title"><i class="fas fa-chart-pie"></i> توزيع الأمراض</h3>
+                            </div>
+                            <div class="chart-container" style="height: 280px;">
+                                <canvas id="diseaseChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title"><i class="fas fa-chart-line"></i> الاتجاهات الشهرية</h3>
+                            </div>
+                            <div class="chart-container" style="height: 280px;">
+                                <canvas id="trendChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="grid-2">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title"><i class="fas fa-chart-bar"></i> الأمراض حسب المحافظة</h3>
+                            </div>
+                            <div class="chart-container" style="height: 280px;">
+                                <canvas id="governorateChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title"><i class="fas fa-chart-pie"></i> نسبة الشفاء</h3>
+                            </div>
+                            <div class="chart-container" style="height: 280px;">
+                                <canvas id="recoveryChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Additional Stats -->
+                    <div class="grid-3" style="margin-top: 1.5rem;">
+                        <div class="card">
+                            <h3 class="card-title"><i class="fas fa-calendar"></i> الإحصائيات اليومية</h3>
+                            <div class="daily-stats">
+                                <div class="daily-item"><span>اليوم</span><strong>12</strong></div>
+                                <div class="daily-item"><span>أمس</span><strong>15</strong></div>
+                                <div class="daily-item"><span>هذا الأسبوع</span><strong>78</strong></div>
+                                <div class="daily-item"><span>هذا الشهر</span><strong>312</strong></div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <h3 class="card-title"><i class="fas fa-percentage"></i> معدل الشفاء حسب المرض</h3>
+                            <div class="recovery-list">
+                                <div class="recovery-item"><span>الحمام القلاعية</span><div class="progress-bar"><div class="progress-fill" style="width: 85%;"></div></div><span>85%</span></div>
+                                <div class="recovery-item"><span>جرب الماشية</span><div class="progress-bar"><div class="progress-fill" style="width: 92%;"></div></div><span>92%</span></div>
+                                <div class="recovery-item"><span>الجمبورو</span><div class="progress-bar"><div class="progress-fill" style="width: 65%;"></div></div><span>65%</span></div>
+                                <div class="recovery-item"><span>PPR</span><div class="progress-bar"><div class="progress-fill" style="width: 45%;"></div></div><span>45%</span></div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <h3 class="card-title"><i class="fas fa-chart-line"></i> نسبة التحسن</h3>
+                            <div class="recovery-list">
+                                <div class="recovery-item"><span>هذا الأسبوع</span><div class="progress-bar"><div class="progress-fill" style="width: 78%; background: var(--success);"></div></div><span>78%</span></div>
+                                <div class="recovery-item"><span>هذا الشهر</span><div class="progress-bar"><div class="progress-fill" style="width: 85%; background: var(--success);"></div></div><span>85%</span></div>
+                                <div class="recovery-item"><span>هذه السنة</span><div class="progress-bar"><div class="progress-fill" style="width: 92%; background: var(--success);"></div></div><span>92%</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Top Diseases & Governorates -->
+                    <div class="grid-2" style="margin-top: 1.5rem;">
+                        <div class="card">
+                            <h3 class="card-title"><i class="fas fa-virus"></i> أكثر الأمراض شيوعاً</h3>
+                            <div class="disease-list">
+                                <div class="daily-item"><span>الحمام القلاعية</span><strong>324</strong></div>
+                                <div class="daily-item"><span>جرب الماشية</span><strong>286</strong></div>
+                                <div class="daily-item"><span>الجمبورو</span><strong>198</strong></div>
+                                <div class="daily-item"><span>PPR</span><strong>156</strong></div>
+                                <div class="daily-item"><span>التهاب الضرع</span><strong>89</strong></div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <h3 class="card-title"><i class="fas fa-map-marker-alt"></i> أكثر المحافظات تسجيلاً</h3>
+                            <div class="disease-list">
+                                <div class="daily-item"><span>بغداد</span><strong>234</strong></div>
+                                <div class="daily-item"><span>البصرة</span><strong>189</strong></div>
+                                <div class="daily-item"><span>نينوى</span><strong>156</strong></div>
+                                <div class="daily-item"><span>أربيل</span><strong>134</strong></div>
+                                <div class="daily-item"><span>كربلاء</span><strong>98</strong></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Diseases Section -->
+            <section id="diseasesSection" class="section-page">
+                <div class="container">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <h2 class="section-title" style="margin-bottom: 0;"><i class="fas fa-virus"></i> الأمراض المحتملة الوقوع</h2>
+                        <button class="btn btn-primary" id="addDiseaseBtn" onclick="showAddDiseaseModal()" style="display: none;">
+                            <i class="fas fa-plus"></i> إضافة مرض
+                        </button>
+                    </div>
+                    
+                    <div class="grid-3" id="diseasesGrid">
+                        <!-- Diseases will be loaded dynamically -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Animals Section -->
+            <section id="animalsSection" class="section-page">
+                <div class="container">
+                    <h2 class="section-title"><i class="fas fa-paw"></i> الحيوانات المسجلة</h2>
+                    
+                    <div class="grid-4" style="margin-bottom: 1.5rem;">
+                        <div class="card animal-stat"><i class="fas fa-cow"></i><div><div class="num">45,230</div><div>أبقار</div></div></div>
+                        <div class="card animal-stat"><i class="fas fa-sheep"></i><div><div class="num">32,150</div><div>أغنام</div></div></div>
+                        <div class="card animal-stat"><i class="fas fa-paw"></i><div><div class="num">18,420</div><div>ماعز</div></div></div>
+                        <div class="card animal-stat"><i class="fas fa-egg"></i><div><div class="num">125,000</div><div>دواجن</div></div></div>
+                    </div>
+                    
+                    <div class="grid-2">
+                        <div class="card">
+                            <h3 class="card-title"><i class="fas fa-plus-circle"></i> تسجيل حيوان جديد</h3>
+                            <form id="animalForm">
+                                <div class="form-group">
+                                    <label class="form-label">نوع الحيوان</label>
+                                    <select class="form-select">
+                                        <option>بقرة</option>
+                                        <option>خروف</option>
+                                        <option>ماعز</option>
+                                        <option>جاموس</option>
+                                        <option>دجاج</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">الرقم التعريفي</label>
+                                    <input type="text" class="form-input" placeholder="IQ-2024-XXXXX">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">العمر</label>
+                                    <input type="number" class="form-input" placeholder="بالأشهر">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">المالك</label>
+                                    <input type="text" class="form-input" placeholder="اسم المالك">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">المحافظة</label>
+                                    <select class="form-select">
+                                        <option>بغداد</option>
+                                        <option>البصرة</option>
+                                        <option>نينوى</option>
+                                        <option>أربيل</option>
+                                        <option>كركوك</option>
+                                        <option>كربلاء</option>
+                                        <option>النجف</option>
+                                        <option>واسط</option>
+                                        <option>ذي قار</option>
+                                        <option>ميسان</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-full"><i class="fas fa-save"></i> تسجيل</button>
+                            </form>
+                        </div>
+                        <div class="card">
+                            <h3 class="card-title"><i class="fas fa-list"></i> آخر التسجيلات</h3>
+                            <div class="animal-list">
+                                <div class="animal-item">
+                                    <div class="animal-icon"><i class="fas fa-cow"></i></div>
+                                    <div><strong>بقرة #IQ-2024-001</strong><p>أحمد محمد - بغداد</p></div>
+                                    <span class="badge-new">جديد</span>
+                                </div>
+                                <div class="animal-item">
+                                    <div class="animal-icon"><i class="fas fa-sheep"></i></div>
+                                    <div><strong>خروف #IQ-2024-002</strong><p>علي حسن - البصرة</p></div>
+                                    <span class="badge-new">جديد</span>
+                                </div>
+                                <div class="animal-item">
+                                    <div class="animal-icon"><i class="fas fa-paw"></i></div>
+                                    <div><strong>ماعز #IQ-2024-003</strong><p>سارة - نينوى</p></div>
+                                    <span class="badge-vaccinated">مُلقح</span>
+                                </div>
+                                <div class="animal-item">
+                                    <div class="animal-icon"><i class="fas fa-egg"></i></div>
+                                    <div><strong>دجاج #IQ-2024-004</strong><p>محمد - أربيل</p></div>
+                                    <span class="badge-healthy">سليم</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Map Section -->
+            <section id="mapSection" class="section-page">
+                <div class="container">
+                    <h2 class="section-title"><i class="fas fa-map-marked-alt"></i> خريطة التفشي</h2>
+                    <div class="card">
+                        <!-- Map Filters -->
+                        <div class="map-filters">
+                            <div class="filter-group">
+                                <label>تصفية حسب المرض:</label>
+                                <select id="diseaseFilter" onchange="filterByDisease(this.value)">
+                                    <option value="all">كل الأمراض</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label>تصفية حسب المحافظة:</label>
+                                <select id="governorateFilter" onchange="filterByGovernorate(this.value)">
+                                    <option value="all">كل المحافظات</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div id="map"></div>
+                        <div id="mapStats" class="map-stats"></div>
+                        <div class="map-legend">
+                            <div class="legend-item"><div class="legend-dot" style="background: #D32F2F;"></div><span>حمام قلعاعية (156)</span></div>
+                            <div class="legend-item"><div class="legend-dot" style="background: #F57F17;"></div><span>جرب (89)</span></div>
+                            <div class="legend-item"><div class="legend-dot" style="background: #0D47A1;"></div><span>جمبورو (45)</span></div>
+                            <div class="legend-item"><div class="legend-dot" style="background: #7B1FA2;"></div><span>PPR (34)</span></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Report Section -->
+            <section id="reportSection" class="section-page">
+                <div class="container">
+                    <h2 class="section-title"><i class="fas fa-file-medical"></i> البلاغات</h2>
+                    <div class="grid-2">
+                        <div class="card">
+                            <h3 class="card-title"><i class="fas fa-plus-circle"></i> إبلاغ عن حالة مرضية</h3>
+                            <form id="reportForm" onsubmit="submitReport(event)">
+                                <div class="form-group">
+                                    <label class="form-label">نوع الحيوان <span style="color:red">*</span></label>
+                                    <select class="form-select" id="animalType" required>
+                                        <option value="">اختر نوع الحيوان</option>
+                                        <option value="cow">بقرة</option>
+                                        <option value="sheep">خروف</option>
+                                        <option value="goat">ماعز</option>
+                                        <option value="buffalo">جاموس</option>
+                                        <option value="chicken">دجاج</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">المحافظة <span style="color:red">*</span></label>
+                                    <select class="form-select" id="governorate" required>
+                                        <option value="">اختر المحافظة</option>
+                                        <option value="baghdad">بغداد</option>
+                                        <option value="basra">البصرة</option>
+                                        <option value="mosul">نينوى</option>
+                                        <option value="erbil">أربيل</option>
+                                        <option value="kirkuk">كركوك</option>
+                                        <option value="karbala">كربلاء</option>
+                                        <option value="najaf">النجف</option>
+                                        <option value="wasit">واسط</option>
+                                        <option value="dhiqar">ذي قار</option>
+                                        <option value="maysan">ميسان</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">الأعراض <span style="color:red">*</span></label>
+                                    <textarea class="form-textarea" id="symptoms" placeholder="صف الأعراض بالتفصيل..." required></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">رقم الحيوان التعريفي</label>
+                                    <input type="text" class="form-input" id="animalId" placeholder="IQ-2024-XXXXX">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">معلومات المبلغ</label>
+                                    <input type="text" class="form-input" id="reporterName" placeholder="الاسم">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">رقم الهاتف</label>
+                                    <input type="tel" class="form-input" id="reporterPhone" placeholder="07xxxxxxxxx">
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-full"><i class="fas fa-paper-plane"></i> إرسال البلاغ</button>
+                            </form>
+                        </div>
+                        <div class="card">
+                            <h3 class="card-title"><i class="fas fa-list"></i> آخر البلاغات</h3>
+                            <div class="reports-list">
+                                <div class="report-item">
+                                    <div class="report-info"><strong>أحمد محمد</strong><span>بقرة - حمام قلعاعية</span></div>
+                                    <div class="report-gov"><i class="fas fa-map-marker"></i> Baghdad</div>
+                                    <span class="report-status status-new">جديد</span>
+                                </div>
+                                <div class="report-item">
+                                    <div class="report-info"><strong>علي حسن</strong><span>خروف - جرب</span></div>
+                                    <div class="report-gov"><i class="fas fa-map-marker"></i> Basra</div>
+                                    <span class="report-status status-pending">قيد المعالجة</span>
+                                </div>
+                                <div class="report-item">
+                                    <div class="report-info"><strong>سارة</strong><span>دجاج - جمبورو</span></div>
+                                    <div class="report-gov"><i class="fas fa-map-marker"></i> Mosul</div>
+                                    <span class="report-status status-treated">تمت المعالجة</span>
+                                </div>
+                                <div class="report-item">
+                                    <div class="report-info"><strong>محمد</strong><span>ماعز - PPR</span></div>
+                                    <div class="report-gov"><i class="fas fa-map-marker"></i> Erbil</div>
+                                    <span class="report-status status-new">جديد</span>
+                                </div>
+                                <div class="report-item">
+                                    <div class="report-info"><strong>علي</strong><span>جاموس - التهاب ضرع</span></div>
+                                    <div class="report-gov"><i class="fas fa-map-marker"></i> Dhi Qar</div>
+                                    <span class="report-status status-recovered">تعافى</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- AI Section -->
+            <section id="analyzerSection" class="section-page">
+                <div class="container">
+                    <div class="ai-section">
+                        <h2 class="section-title" style="color: white;"><i class="fas fa-robot"></i> المحلل بالذكاء الاصطناعي</h2>
+                        <p style="opacity: 0.9; margin-bottom: 1rem;">أدخل الأعراض للحصول على تشخيص احترافي باستخدام الذكاء الاصطناعي</p>
+                        <div class="card" style="background: rgba(255,255,255,0.95);">
+                            <div class="form-group">
+                                <label class="form-label">وصف الأعراض</label>
+                                <textarea class="form-textarea" id="symptomsInput" placeholder="أدخل الأعراض، مثل: حمى، إفرازات، فقدان شهية، عرج، تورم..."></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">رفع صورة (اختياري)</label>
+                                <div class="upload-box">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                    <p>اسحب الصورة هنا أو انقر للرفع</p>
+                                </div>
+                            </div>
+                            <button class="btn btn-primary btn-full" onclick="analyzeDisease()"><i class="fas fa-microphone"></i> تحليل الحالة</button>
+                            <div class="ai-result" id="aiResult">
+                                <div class="disease-name" id="diseaseName">جرب الماشية (LSD)</div>
+                                <div>مستوى الثقة: <span id="confidencePercent" style="font-weight: 700; color: var(--primary);">87%</span></div>
+                                <div class="confidence-bar"><div class="confidence-fill" id="confidenceBar" style="width: 87%;"></div></div>
+                                <div class="recommendations">
+                                    <h4><i class="fas fa-lightbulb"></i> التوصيات</h4>
+                                    <ul>
+                                        <li>عزل الحيوان المصاب فوراً في مكان منفصل</li>
+                                        <li>استدعاء الطبيب البيطري للمعاينة والتشخيص النهائي</li>
+                                        <li>توفير بيئة جافة ونظيفة مع تهوية جيدة</li>
+                                        <li>إعطاء مضادات حيوية تحت إشراف بيطري</li>
+                                        <li>تطهير المكان والأدوات المستخدمة</li>
+                                        <li>توثيق الحالة وإبلاغ السلطات المختصة</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="grid-2" style="margin-top: 1.5rem;">
+                        <div class="card">
+                            <h3 class="card-title"><i class="fas fa-history"></i> سجل التحليلات</h3>
+                            <div class="analysis-history">
+                                <div class="analysis-item">
+                                    <div class="analysis-info"><strong>جرب الماشية</strong><p>87% - 2024/01/15</p></div>
+                                    <span class="analysis-status confirmed">مؤكد</span>
+                                </div>
+                                <div class="analysis-item">
+                                    <div class="analysis-info"><strong>الحمام القلاعية</strong><p>72% - 2024/01/14</p></div>
+                                    <span class="analysis-status pending">قيد الفحص</span>
+                                </div>
+                                <div class="analysis-item">
+                                    <div class="analysis-info"><strong>التهاب الضرع</strong><p>95% - 2024/01/13</p></div>
+                                    <span class="analysis-status confirmed">مؤكد</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <h3 class="card-title"><i class="fas fa-info-circle"></i> كيفية الاستخدام</h3>
+                            <div class="usage-guide">
+                                <p><i class="fas fa-1"></i> أدخل الأعراض التي تلاحظها على الحيوان</p>
+                                <p><i class="fas fa-2"></i> يمكنك رفع صورة للحالة إن أمكن</p>
+                                <p><i class="fas fa-3"></i> اضغط على زر التحليل</p>
+                                <p><i class="fas fa-4"></i> اقرأ التوصيات واتبعها</p>
+                                <p><i class="fas fa-5"></i> استشر طبيب بيطري مختص</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Veterinarians Section -->
+            <section id="vetsSection" class="section-page">
+                <div class="container">
+                    <h2 class="section-title"><i class="fas fa-user-md"></i> الأطباء البيطريين</h2>
+                    
+                    <div class="grid-4" style="margin-bottom: 1.5rem;">
+                        <div class="card vet-stat"><i class="fas fa-user-md"></i><div><div class="num">45</div><div>إجمالي الأطباء</div></div></div>
+                        <div class="card vet-stat"><i class="fas fa-hospital"></i><div><div class="num">12</div><div>عيادات</div></div></div>
+                        <div class="card vet-stat"><i class="fas fa-ambulance"></i><div><div class="num">8</div><div>خدمات متنقلة</div></div></div>
+                        <div class="card vet-stat"><i class="fas fa-phone"></i><div><div class="num">24/7</div><div>طوارئ</div></div></div>
+                    </div>
+                    
+                    <div class="grid-2">
+                        <div class="card">
+                            <h3 class="card-title"><i class="fas fa-user-plus"></i> إضافة طبيب بيطري</h3>
+                            <form id="vetForm">
+                                <div class="form-group">
+                                    <label class="form-label">الاسم الكامل</label>
+                                    <input type="text" class="form-input" placeholder="الدكتور...">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">رقم الترخيص</label>
+                                    <input type="text" class="form-input" placeholder="رقم الترخيص">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">التخصص</label>
+                                    <select class="form-select">
+                                        <option>طب الأبقار</option>
+                                        <option>طب الدواجن</option>
+                                        <option>الجراحة</option>
+                                        <option>الطب العام</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">المحافظة</label>
+                                    <select class="form-select">
+                                        <option>بغداد</option>
+                                        <option>البصرة</option>
+                                        <option>نينوى</option>
+                                        <option>أربيل</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">رقم الهاتف</label>
+                                    <input type="tel" class="form-input" placeholder="07xxxxxxxxx">
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-full"><i class="fas fa-save"></i> إضافة</button>
+                            </form>
+                        </div>
+                        <div class="card">
+                            <h3 class="card-title"><i class="fas fa-list"></i> الأطباء المسجلين</h3>
+                            <div class="vet-list">
+                                <div class="vet-item">
+                                    <div class="vet-avatar"><i class="fas fa-user-md"></i></div>
+                                    <div class="vet-info"><strong>د. أحمد الشمري</strong><p>طب الأبقار | بغداد</p><small>0771-234-5678</small></div>
+                                    <span class="vet-status active">متاح</span>
+                                </div>
+                                <div class="vet-item">
+                                    <div class="vet-avatar"><i class="fas fa-user-md"></i></div>
+                                    <div class="vet-info"><strong>د. محمد الجبوري</strong><p>طب الدواجن | البصرة</p><small>0772-345-6789</small></div>
+                                    <span class="vet-status active">متاح</span>
+                                </div>
+                                <div class="vet-item">
+                                    <div class="vet-avatar"><i class="fas fa-user-md"></i></div>
+                                    <div class="vet-info"><strong>د. سارة الغزالي</strong><p>الجراحة | نينوى</p><small>0773-456-7890</small></div>
+                                    <span class="vet-status busy">مشغول</span>
+                                </div>
+                                <div class="vet-item">
+                                    <div class="vet-avatar"><i class="fas fa-user-md"></i></div>
+                                    <div class="vet-info"><strong>د. علي الكردي</strong><p>الطب العام | أربيل</p><small>0774-567-8901</small></div>
+                                    <span class="vet-status active">متاح</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Users Section -->
+            <section id="usersSection" class="section-page">
+                <div class="container">
+                    <h2 class="section-title"><i class="fas fa-users"></i> إدارة المستخدمين</h2>
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fas fa-list"></i> قائمة المستخدمين</h3>
+                            <button class="btn btn-primary btn-sm" onclick="showAddUserModal()"><i class="fas fa-plus"></i> إضافة مستخدم</button>
+                        </div>
+                        <table class="users-table">
+                            <thead>
+                                <tr><th>الاسم</th><th>اسم المستخدم</th><th>الدور</th><th>الحالة</th><th>التاريخ</th><th>الإجراءات</th></tr>
+                            </thead>
+                            <tbody id="usersTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+<!-- Settings Section -->
+            <section id="settingsSection" class="section-page">
+                <div class="container">
+                    <h2 class="section-title"><i class="fas fa-cog"></i> الإعدادات</h2>
+                    <div class="grid-2">
+                        <div class="card">
+                            <h3 class="card-title"><i class="fas fa-sliders-h"></i> إعدادات النظام</h3>
+                            <div class="settings-list">
+                                <div class="setting-item">
+                                    <div class="setting-info"><i class="fas fa-robot"></i><div><h5>الوضع الآلي</h5><p>تفعيل التحليل التلقائي بالأعراض</p></div></div>
+                                    <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+                                </div>
+                                <div class="setting-item">
+                                    <div class="setting-info"><i class="fas fa-bell"></i><div><h5>إشعارات التفشي</h5><p>تلقي تنبيهات عند حدوث تفشي</p></div></div>
+                                    <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+                                </div>
+                                <div class="setting-item">
+                                    <div class="setting-info"><i class="fas fa-map"></i><div><h5>تحديث الخريطة</h5><p>تحديث تلقائي لمعلومات الخريطة</p></div></div>
+                                    <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+                                </div>
+                                <div class="setting-item">
+                                    <div class="setting-info"><i class="fas fa-envelope"></i><div><h5>إشعارات البريد</h5><p>إرسال تقارير عبر البريد الإلكتروني</p></div></div>
+                                    <label class="switch"><input type="checkbox"><span class="slider"></span></label>
+                                </div>
+                                <div class="setting-item">
+                                    <div class="setting-info"><i class="fas fa-language"></i><div><h5>اللغة</h5><p>تغيير لغة الواجهة</p></div></div>
+                                    <select class="form-select" style="width: auto;">
+                                        <option>العربية</option>
+                                        <option>الإنجليزية</option>
+                                    </select>
+                                </div>
+                                <div class="setting-item">
+                                    <div class="setting-info"><i class="fas fa-moon"></i><div><h5>الوضع الليلي</h5><p>تفعيل الوضع الداكن</p></div></div>
+                                    <label class="switch"><input type="checkbox"><span class="slider"></span></label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <h3 class="card-title"><i class="fas fa-info-circle"></i> معلومات النظام</h3>
+                            <div class="system-info">
+                                <div class="info-item"><i class="fas fa-shield-virus"></i><div><span>اسم النظام</span><strong>EagleVET</strong></div></div>
+                                <div class="info-item"><i class="fas fa-code"></i><div><span>الإصدار</span><strong>1.0.0</strong></div></div>
+                                <div class="info-item"><i class="fas fa-user"></i><div><span>المطور</span><strong>علي غالب</strong></div></div>
+                                <div class="info-item"><i class="fas fa-calendar"></i><div><span>تاريخ الإطلاق</span><strong>يناير 2024</strong></div></div>
+                                <div class="info-item"><i class="fas fa-server"></i><div><span>نوع الخادم</span><strong>Local Storage</strong></div></div>
+                                <div class="info-item"><i class="fas fa-database"></i><div><span>قاعدة البيانات</span><strong>JSON</strong></div></div>
+                                <div class="info-item"><i class="fas fa-globe"></i><div><span>الدولة</span><strong>العراق</strong></div></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Roles Management Section - Admin Only -->
+<div id="rolesManagementSection" style="display: none; margin-top: 1.5rem;">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title"><i class="fas fa-user-shield"></i> إدارة الرتب الإشرافية</h3>
+                                <button class="btn btn-primary btn-sm" onclick="showAddRoleModal()">
+                                    <i class="fas fa-plus"></i> إضافة رتبة جديدة
+                                </button>
+                            </div>
+                            <div id="rolesList">
+                                <!-- Roles will be loaded dynamically -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Diseases Study Section -->
+            <section id="diseases-studySection" class="section-page">
+                <div class="container">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <h2 class="section-title" style="margin-bottom: 0;"><i class="fas fa-book-medical"></i> دراسة الأمراض</h2>
+                        <button class="btn btn-primary" onclick="showAddStudyDiseaseModal()">
+                            <i class="fas fa-plus"></i> إضافة مرض
+                        </button>
+                    </div>
+                    
+                    <!-- Search and Filter -->
+                    <div class="card" style="margin-bottom: 1.5rem;">
+                        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                            <div style="flex: 1; min-width: 200px;">
+                                <input type="text" class="form-input" id="studyDiseaseSearch" placeholder="البحث عن مرض..." oninput="filterStudyDiseases()">
+                            </div>
+                            <select class="form-select" id="studyCategoryFilter" style="width: 200px;" onchange="filterStudyDiseases()">
+                                <option value="all">كل الفئات</option>
+                                <option value="أمراض الأبقار">أمراض الأبقار</option>
+                                <option value="أ diseases Sheep and Goat">أ diseases Sheep and Goat</option>
+                                <option value="أ diseases الدواجن">أ diseases الدواجن</option>
+                                <option value="أ diseases الإبل">أ diseases الإبل</option>
+                                <option value="أ diseases الخيول">أ diseases الخيول</option>
+                                <option value="أ diseases الخنازير">أ diseases الخنازير</option>
+                                <option value="الأمراض المشتركة">الأمراض المشتركة</option>
+                                <option value="أ diseases الأيض">أ diseases الأيض</option>
+                                <option value="أ diseases النحل">أ diseases النحل</option>
+                                <option value="أ diseases الأسماك">أ diseases الأسماك</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Diseases Study Grid -->
+                    <div class="grid-3" id="studyDiseasesGrid">
+                        <!-- Diseases will be loaded dynamically -->
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3><i class="fas fa-shield-virus"></i> عن التطبيق</h3>
+                    <p>نظام رصد الأمراض البيطرية بالذكاء الاصطناعي في العراق لحماية الثروة الحيوانية.</p>
+                    <div style="margin-top: 1rem;">
+                        <strong>روابط مهمة:</strong>
+                        <ul style="margin-top: 0.5rem;">
+                            <li><a href="#">الهيئة العامة للبيطرة</a></li>
+                            <li><a href="#">وزارة الزراعة</a></li>
+                            <li><a href="#">منظمة الصحة الحيوانية</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h3><i class="fas fa-link"></i> روابط سريعة</h3>
+                    <ul>
+                        <li><a href="#" onclick="showSection('stats')">الإحصائيات</a></li>
+                        <li><a href="#" onclick="showSection('diseases')">الأمراض</a></li>
+                        <li><a href="#" onclick="showSection('animals')">الحيوانات</a></li>
+                        <li><a href="#" onclick="showSection('map')">الخريطة</a></li>
+                        <li><a href="#" onclick="showSection('report')">الإبلاغ</a></li>
+                        <li><a href="#" onclick="showSection('vets')">البيطريين</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3><i class="fas fa-phone"></i> جهات الاتصال</h3>
+                    <ul>
+                        <li><i class="fas fa-phone"></i> الطوارئ: 153</li>
+                        <li><i class="fas fa-hospital"></i> الهيئة العامة للبيطرة</li>
+                        <li><i class="fas fa-mobile-alt"></i> 07701234567</li>
+                        <li><i class="fas fa-envelope"></i> info@raasid.iq</li>
+                        <li><i class="fas fa-map-marker"></i> بغداد - وزارة الزراعة</li>
+                    </ul>
+                </div>
+            </div>
+<div class="footer-bottom">
+                <p>© 2024 EagleVET - نظام رصد الأمراض البيطرية في العراق | جميع الحقوق محفوظة</p>
+                <p style="margin-top: 0.5rem; font-size: 0.8rem;">تم التطوير بواسطة علي غالب بأشراف الدكتور محمد حمزة</p>
+                <p style="margin-top: 0.3rem; font-size: 0.8rem;">جامعة القادسية - كلية الطب البيطري</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Add User Modal -->
+    <div class="modal" id="addUserModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-user-plus"></i> إضافة مستخدم جديد</h3>
+                <button onclick="closeModal()">×</button>
+            </div>
+            <form id="addUserForm">
+                <div class="form-group">
+                    <label class="form-label">الاسم الكامل</label>
+                    <input type="text" class="form-input" id="newUserName" placeholder="أدخل الاسم الكامل" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">اسم المستخدم</label>
+                    <input type="text" class="form-input" id="newUsername" placeholder="أدخل اسم المستخدم" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">كلمة المرور</label>
+                    <input type="password" class="form-input" id="newPassword" placeholder="أدخل كلمة المرور" required>
+                </div>
+<div class="form-group">
+                    <label class="form-label">الدور</label>
+                    <select class="form-select" id="newUserRole">
+                        <option value="supervisor">مشرف</option>
+                        <option value="manager">مدير</option>
+                        <option value="admin" id="adminRoleOption" style="display:none;">مدير نظام</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary btn-full"><i class="fas fa-save"></i> حفظ المستخدم</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Disease Modal -->
+    <div class="modal" id="diseaseModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="diseaseModalTitle"><i class="fas fa-virus"></i> إضافة مرض جديد</h3>
+                <button onclick="closeDiseaseModal()">×</button>
+            </div>
+            <form id="diseaseForm" onsubmit="saveDisease(event)">
+                <input type="hidden" id="diseaseId">
+                <div class="form-group">
+                    <label class="form-label">اسم المرض</label>
+                    <input type="text" class="form-input" id="diseaseName" placeholder="أدخل اسم المرض" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">الاسم بالإنجليزية</label>
+                    <input type="text" class="form-input" id="diseaseNameEn" placeholder="Disease name in English">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">الوصف</label>
+                    <textarea class="form-textarea" id="diseaseDescription" placeholder="وصف المرض" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">الحيوانات المتأثرة</label>
+                    <input type="text" class="form-input" id="diseaseAnimals" placeholder="مثال: الأبقار والأغنام" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">نسبة النفوق</label>
+                    <input type="text" class="form-input" id="diseaseMortality" placeholder="مثال: 5%" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">الأعراض</label>
+                    <textarea class="form-textarea" id="diseaseSymptoms" placeholder="الأعراض الرئيسية" required></textarea>
+                </div>
+<div class="form-group">
+                    <label class="form-label">مستوى الخطورة</label>
+                    <select class="form-select" id="diseaseRiskLevel" required>
+                        <option value="high">مخاطر عالية</option>
+                        <option value="medium">مخاطر متوسطة</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                        <input type="checkbox" id="diseaseOutbreak" style="width: 18px; height: 18px; accent-color: var(--error);">
+                        <span style="font-weight: 600; color: var(--error);"><i class="fas fa-exclamation-triangle"></i> تفشي نشط</span>
+                    </label>
+                </div>
+                <button type="submit" class="btn btn-primary btn-full"><i class="fas fa-save"></i> حفظ</button>
+            </form>
+        </div>
+    </div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+    <!-- Add Role Modal -->
+    <div class="modal" id="addRoleModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-user-shield"></i> إضافة رتبة إشرافية جديدة</h3>
+                <button onclick="closeRoleModal()">×</button>
+            </div>
+            <form id="addRoleForm">
+                <div class="form-group">
+                    <label class="form-label">اسم الرتبة</label>
+                    <input type="text" class="form-input" id="roleName" placeholder="أدخل اسم الرتبة" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">وصف الرتبة</label>
+                    <textarea class="form-textarea" id="roleDescription" placeholder="وصف الرتبة وصلاحياتها"></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">الصلاحيات</label>
+                    <div class="permissions-grid">
+                        <label><input type="checkbox" id="permViewStats"> عرض الإحصائيات</label>
+                        <label><input type="checkbox" id="permViewDiseases"> عرض الأمراض</label>
+                        <label><input type="checkbox" id="permManageDiseases"> إدارة الأمراض</label>
+                        <label><input type="checkbox" id="permViewMap"> عرض الخريطة</label>
+                        <label><input type="checkbox" id="permViewReport"> عرض البلاغات</label>
+                        <label><input type="checkbox" id="permUseAI"> استخدام الذكاء الاصطناعي</label>
+                        <label><input type="checkbox" id="permManageUsers"> إدارة المستخدمين</label>
+                        <label><input type="checkbox" id="permAddUsers"> إضافة مستخدمين</label>
+                        <label><input type="checkbox" id="permDeleteUsers"> حذف مستخدمين</label>
+                        <label><input type="checkbox" id="permEditSettings"> تعديل الإعدادات</label>
+                        <label><input type="checkbox" id="permDeleteReports"> حذف البلاغات</label>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-full"><i class="fas fa-save"></i> حفظ الرتبة</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="assets/js/main.js"></script>
+</body>
+</html>
