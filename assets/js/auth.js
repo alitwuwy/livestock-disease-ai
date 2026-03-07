@@ -5,7 +5,22 @@
 let currentUser = null;
 
 // Special admin email
-const ADMIN_EMAIL = "kknafh@gmail.com";
+const ADMIN_EMAIL = "admin@eaglevet.com";
+const ADMIN_PASSWORD = "Admin@123456";
+
+// Helper function to convert username to email
+function convertUsernameToEmail(input) {
+    // If input is "admin", convert to admin email
+    if (input && input.toLowerCase() === 'admin') {
+        return ADMIN_EMAIL;
+    }
+    // If input already contains @, it's an email
+    if (input && input.includes('@')) {
+        return input;
+    }
+    // Otherwise, treat as email (append @eaglevet.com)
+    return input + '@eaglevet.com';
+}
 
 // Register a new user with email and password
 async function registerUser(name, email, password) {
@@ -20,6 +35,7 @@ async function registerUser(name, email, password) {
             name: name,
             email: email,
             role: "supervisor", // Default role for new users
+            status: "active",
             createdAt: new Date().toISOString()
         });
         
@@ -31,18 +47,21 @@ async function registerUser(name, email, password) {
             role: "supervisor"
         };
         
-        alert("تم إنشاء الحساب بنجاح!");
+        showToast("تم إنشاء الحساب بنجاح!", "success");
         return { success: true, user: currentUser };
     } catch (error) {
         console.error("Registration error:", error);
-        alert("خطأ في إنشاء الحساب: " + error.message);
+        showToast("خطأ في إنشاء الحساب: " + error.message, "error");
         return { success: false, error: error.message };
     }
 }
 
-// Login user with email and password
-async function loginUser(email, password) {
+// Login user with email or username
+async function loginUser(emailOrUsername, password) {
     try {
+        // Convert username to email if needed
+        const email = convertUsernameToEmail(emailOrUsername);
+        
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
         
@@ -65,21 +84,33 @@ async function loginUser(email, password) {
             
             currentUser = {
                 uid: user.uid,
-                name: user.displayName || email.split('@')[0],
+                name: isAdmin ? "مدير النظام" : user.displayName || email.split('@')[0],
                 email: user.email,
-                role: isAdmin ? "admin" : "supervisor"
+                role: isAdmin ? "admin" : "supervisor",
+                status: "active",
+                username: isAdmin ? "admin" : email.split('@')[0]
             };
             
             // Save to Firestore
             await setDoc(doc(db, "users", user.uid), currentUser);
         }
         
-        alert("تم تسجيل الدخول بنجاح!");
+        showToast("مرحباً بك " + currentUser.name + "!", "success");
         return { success: true, user: currentUser };
     } catch (error) {
         console.error("Login error:", error);
-        alert("خطأ في تسجيل الدخول: " + error.message);
-        return { success: false, error: error.message };
+        let errorMessage = "خطأ في تسجيل الدخول";
+        if (error.code === "auth/invalid-email") {
+            errorMessage = "البريد الإلكتروني غير صالح";
+        } else if (error.code === "auth/user-not-found") {
+            errorMessage = "المستخدم غير موجود";
+        } else if (error.code === "auth/wrong-password") {
+            errorMessage = "كلمة المرور غير صحيحة";
+        } else if (error.code === "auth/invalid-credential") {
+            errorMessage = "بيانات الاعتماد غير صحيحة";
+        }
+        showToast(errorMessage, "error");
+        return { success: false, error: errorMessage };
     }
 }
 
@@ -97,7 +128,7 @@ async function logoutUser() {
         return { success: true };
     } catch (error) {
         console.error("Logout error:", error);
-        alert("خطأ في تسجيل الخروج: " + error.message);
+        showToast("خطأ في تسجيل الخروج", "error");
         return { success: false, error: error.message };
     }
 }
@@ -140,9 +171,11 @@ function initAuthListener() {
                     
                     currentUser = {
                         uid: user.uid,
-                        name: user.displayName || user.email.split('@')[0],
+                        name: isAdmin ? "مدير النظام" : user.displayName || user.email.split('@')[0],
                         email: user.email,
-                        role: isAdmin ? "admin" : "supervisor"
+                        role: isAdmin ? "admin" : "supervisor",
+                        status: "active",
+                        username: isAdmin ? "admin" : user.email.split('@')[0]
                     };
                     
                     await setDoc(doc(db, "users", user.uid), currentUser);
@@ -284,3 +317,4 @@ window.updateUserProfile = updateUserProfile;
 window.getUserById = getUserById;
 window.getAllUsers = getAllUsers;
 window.deleteUserAccount = deleteUserAccount;
+window.convertUsernameToEmail = convertUsernameToEmail;

@@ -123,7 +123,14 @@ function initializeDiseases() {
 
 // Get all diseases
 function getDiseases() {
-    return JSON.parse(localStorage.getItem('raasidDiseases') || '[]');
+    let diseases = JSON.parse(localStorage.getItem('raasidDiseases') || '[]');
+    
+    if (diseases.length === 0) {
+        initializeDiseases();
+        diseases = JSON.parse(localStorage.getItem('raasidDiseases') || '[]');
+    }
+    
+    return diseases;
 }
 
 // Add new disease
