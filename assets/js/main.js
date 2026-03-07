@@ -321,6 +321,9 @@ function showSection(sectionId) {
     if (sectionId === 'stats') {
         setTimeout(function() { initCharts(); }, 300);
     }
+    if (sectionId === 'diseases') {
+        setTimeout(function() { loadDiseasesTable(); }, 100);
+    }
 }
 
 // Load users table - uses Firestore via users.js
