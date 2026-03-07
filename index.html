@@ -15,13 +15,14 @@
     <!-- Firebase SDK -->
     <script type="module">
         // Import the functions you need from the SDKs you need
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-analytics.js";
-        // TODO: Add SDKs for Firebase products that you want to use
-        // https://firebase.google.com/docs/web/setup#available-libraries
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
+        import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } 
+        from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, collection, doc, setDoc, getDoc, getDocs, updateDoc, deleteDoc } 
+        from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-        // Your web app's Firebase configuration
-        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+        // Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyDAe7PoqZ4YkELcsnnXbriy336bN9lLOJM",
             authDomain: "eaglevet.firebaseapp.com",
@@ -36,33 +37,218 @@
         const app = initializeApp(firebaseConfig);
         const analytics = getAnalytics(app);
         
-        // Firebase Authentication
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } 
-        from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        // Initialize Firebase services
+        const auth = getAuth(app);
+        const db = getFirestore(app);
 
-        const auth = getAuth();
-
-        // إنشاء حساب
-        window.registerUser = function(email, password) {
-            createUserWithEmailAndPassword(auth, email, password)
-            .then((userCredential) => {
-                alert("تم إنشاء الحساب بنجاح");
-            })
-            .catch((error) => {
-                alert(error.message);
-            });
+        // Default roles
+        const defaultRoles = {
+            admin: {
+                name: 'مدير نظام',
+                canViewStats: true,
+                canViewDiseases: true,
+                canManageDiseases: true,
+                canViewMap: true,
+                canViewReport: true,
+                canUseAI: true,
+                canManageUsers: true,
+                canAddUsers: true,
+                canDeleteUsers: true,
+                canEditSettings: true,
+                canDeleteReports: true
+            },
+            manager: {
+                name: 'مدير',
+                canViewStats: true,
+                canViewDiseases: true,
+                canManageDiseases: true,
+                canViewMap: true,
+                canViewReport: true,
+                canUseAI: true,
+                canManageUsers: true,
+                canAddUsers: true,
+                canDeleteUsers: false,
+                canEditSettings: false,
+                canDeleteReports: true
+            },
+            supervisor: {
+                name: 'مشرف',
+                canViewStats: true,
+                canViewDiseases: true,
+                canManageDiseases: false,
+                canViewMap: true,
+                canViewReport: true,
+                canUseAI: true,
+                canManageUsers: false,
+                canAddUsers: false,
+                canDeleteUsers: false,
+                canEditSettings: false,
+                canDeleteReports: false
+            },
+            visitor: {
+                name: 'زائر',
+                canViewStats: true,
+                canViewDiseases: true,
+                canManageDiseases: false,
+                canViewMap: true,
+                canViewReport: true,
+                canUseAI: true,
+                canManageUsers: false,
+                canAddUsers: false,
+                canDeleteUsers: false,
+                canEditSettings: false,
+                canDeleteReports: false
+            }
         };
 
-        // تسجيل الدخول
-        window.loginUser = function(email, password) {
-            signInWithEmailAndPassword(auth, email, password)
-            .then((userCredential) => {
-                alert("تم تسجيل الدخول");
-            })
-            .catch((error) => {
-                alert(error.message);
-            });
+        // Current user state
+        let currentUser = null;
+
+        // Get user permissions
+        window.getUserPermissions = function(role) {
+            return defaultRoles[role] || defaultRoles.visitor;
         };
+
+        // Register new user
+        window.registerUser = async function(name, email, password) {
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+                
+                // Store user data in Firestore
+                await setDoc(doc(db, "users", user.uid), {
+                    uid: user.uid,
+                    name: name,
+                    email: email,
+                    role: "supervisor",
+                    createdAt: new Date().toISOString()
+                });
+                
+                alert("تم إنشاء الحساب بنجاح!");
+                return { success: true };
+            } catch (error) {
+                alert("خطأ: " + error.message);
+                return { success: false, error: error.message };
+            }
+        };
+
+        // Login user
+        window.loginUser = async function(email, password) {
+            try {
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+                
+                // Get user data from Firestore
+                const userDoc = await getDoc(doc(db, "users", user.uid));
+                
+                if (userDoc.exists()) {
+                    currentUser = userDoc.data();
+                    currentUser.uid = user.uid;
+                } else {
+                    currentUser = {
+                        uid: user.uid,
+                        name: user.displayName || email.split('@')[0],
+                        email: user.email,
+                        role: "supervisor"
+                    };
+                    await setDoc(doc(db, "users", user.uid), currentUser);
+                }
+                
+                alert("تم تسجيل الدخول بنجاح!");
+                applyUserToUI(currentUser);
+                return { success: true, user: currentUser };
+            } catch (error) {
+                alert("خطأ: " + error.message);
+                return { success: false, error: error.message };
+            }
+        };
+
+        // Logout user
+        window.logoutUser = async function() {
+            try {
+                await signOut(auth);
+                currentUser = null;
+                location.reload();
+            } catch (error) {
+                alert("خطأ: " + error.message);
+            }
+        };
+
+        // Get current user
+        window.getCurrentUser = function() {
+            return currentUser;
+        };
+
+        // Apply user to UI
+        function applyUserToUI(user) {
+            if (!user) return;
+            
+            const perms = window.getUserPermissions(user.role);
+            
+            // Update user info
+            const displayUsername = document.getElementById('displayUsername');
+            const userRole = document.getElementById('userRole');
+            const heroSubtitle = document.getElementById('heroSubtitle');
+            
+            if (displayUsername) displayUsername.textContent = user.name || user.email;
+            if (userRole) userRole.textContent = perms.name;
+            if (heroSubtitle) heroSubtitle.textContent = 'مرحباً بك يا ' + (user.name || 'زائر') + ' في لوحة التحكم';
+            
+            // Show/hide admin sections
+            const navUsersLink = document.getElementById('nav-users-link');
+            const navSettingsLink = document.getElementById('nav-settings-link');
+            
+            if (navUsersLink) {
+                navUsersLink.style.display = perms.canManageUsers ? 'block' : 'none';
+            }
+            if (navSettingsLink) {
+                navSettingsLink.style.display = perms.canEditSettings ? 'block' : 'none';
+            }
+            
+            // Show main app
+            document.getElementById('loginPage').classList.add('hidden');
+            document.getElementById('mainApp').classList.remove('hidden');
+            
+            // Initialize app
+            if (typeof initAll === 'function') {
+                initAll();
+            }
+            if (typeof loadUsersTable === 'function') {
+                loadUsersTable();
+            }
+        }
+
+        // Listen for auth state changes
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                try {
+                    const userDoc = await getDoc(doc(db, "users", user.uid));
+                    
+                    if (userDoc.exists()) {
+                        currentUser = userDoc.data();
+                        currentUser.uid = user.uid;
+                    } else {
+                        currentUser = {
+                            uid: user.uid,
+                            name: user.displayName || user.email.split('@')[0],
+                            email: user.email,
+                            role: "supervisor"
+                        };
+                        await setDoc(doc(db, "users", user.uid), currentUser);
+                    }
+                    
+                    applyUserToUI(currentUser);
+                } catch (error) {
+                    console.error("Error fetching user:", error);
+                }
+            } else {
+                currentUser = null;
+            }
+        });
+
+        // Export for use in other scripts
+        window.auth = auth;
+        window.db = db;
     </script>
 </head>
 <body>
@@ -76,23 +262,83 @@
             <p class="login-subtitle">نظام رصد الأمراض البيطرية بالذكاء الاصطناعي في العراق</p>
             <form id="loginForm">
                 <div class="form-group">
-                    <label class="form-label">اسم المستخدم</label>
-                    <input type="text" class="form-input" id="username" placeholder="أدخل اسم المستخدم" required>
+                    <label class="form-label">البريد الإلكتروني</label>
+                    <input type="email" class="form-input" id="email" placeholder="أدخل البريد الإلكتروني" required>
                 </div>
                 <div class="form-group">
                     <label class="form-label">كلمة المرور</label>
                     <input type="password" class="form-input" id="password" placeholder="أدخل كلمة المرور" required>
                 </div>
+                <div class="form-group" id="nameGroup" style="display: none;">
+                    <label class="form-label">الاسم</label>
+                    <input type="text" class="form-input" id="regName" placeholder="أدخل اسمك الكامل">
+                </div>
                 <button type="submit" class="btn btn-primary btn-full">
                     <i class="fas fa-sign-in-alt"></i> تسجيل الدخول
                 </button>
-                <button type="button" class="btn btn-secondary btn-full" onclick="loginUser(username.value, password.value)" style="margin-top: 0.5rem;">
+                <button type="button" class="btn btn-secondary btn-full" onclick="handleLogin()" style="margin-top: 0.5rem;">
                     <i class="fas fa-sign-in-alt"></i> تسجيل الدخول Firebase
                 </button>
-                <button type="button" class="btn btn-success btn-full" onclick="registerUser(username.value, password.value)" style="margin-top: 0.5rem;">
-                    <i class="fas fa-user-plus"></i> إنشاء حساب
+                <button type="button" class="btn btn-success btn-full" onclick="toggleRegisterMode()" id="registerBtn" style="margin-top: 0.5rem;">
+                    <i class="fas fa-user-plus"></i> إنشاء حساب جديد
                 </button>
             </form>
+            <script>
+                let isRegisterMode = false;
+                
+                function toggleRegisterMode() {
+                    isRegisterMode = !isRegisterMode;
+                    const nameGroup = document.getElementById('nameGroup');
+                    const registerBtn = document.getElementById('registerBtn');
+                    
+                    if (isRegisterMode) {
+                        nameGroup.style.display = 'block';
+                        registerBtn.innerHTML = '<i class="fas fa-user-plus"></i> تأكيد إنشاء الحساب';
+                        registerBtn.onclick = handleRegister;
+                    } else {
+                        nameGroup.style.display = 'none';
+                        registerBtn.innerHTML = '<i class="fas fa-user-plus"></i> إنشاء حساب جديد';
+                        registerBtn.onclick = toggleRegisterMode;
+                    }
+                }
+                
+                async function handleLogin() {
+                    const email = document.getElementById('email').value;
+                    const password = document.getElementById('password').value;
+                    
+                    if (!email || !password) {
+                        alert('يرجى إدخال البريد الإلكتروني وكلمة المرور');
+                        return;
+                    }
+                    
+                    await loginUser(email, password);
+                }
+                
+                async function handleRegister() {
+                    const name = document.getElementById('regName').value;
+                    const email = document.getElementById('email').value;
+                    const password = document.getElementById('password').value;
+                    
+                    if (!name || !email || !password) {
+                        alert('يرجى إدخال جميع الحقول المطلوبة');
+                        return;
+                    }
+                    
+                    await registerUser(name, email, password);
+                    
+                    // Reset to login mode after registration
+                    isRegisterMode = false;
+                    document.getElementById('nameGroup').style.display = 'none';
+                    document.getElementById('registerBtn').innerHTML = '<i class="fas fa-user-plus"></i> إنشاء حساب جديد';
+                    document.getElementById('registerBtn').onclick = toggleRegisterMode;
+                }
+                
+                // Update form submit to use Firebase login
+                document.getElementById('loginForm').addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    handleLogin();
+                });
+            </script>
             <p style="margin-top: 1.5rem; font-size: 0.85rem; color: var(--text-secondary);">
                 للتصفح كزائر <a href="#" onclick="showPublicPage()" style="color: var(--accent);">اضغط هنا</a>
             </p>
@@ -952,8 +1198,8 @@
                                 <div class="info-item"><i class="fas fa-code"></i><div><span>الإصدار</span><strong>1.0.0</strong></div></div>
                                 <div class="info-item"><i class="fas fa-user"></i><div><span>المطور</span><strong>علي غالب</strong></div></div>
                                 <div class="info-item"><i class="fas fa-calendar"></i><div><span>تاريخ الإطلاق</span><strong>يناير 2024</strong></div></div>
-                                <div class="info-item"><i class="fas fa-server"></i><div><span>نوع الخادم</span><strong>Local Storage</strong></div></div>
-                                <div class="info-item"><i class="fas fa-database"></i><div><span>قاعدة البيانات</span><strong>JSON</strong></div></div>
+                                <div class="info-item"><i class="fas fa-server"></i><div><span>المصادقة</span><strong>Firebase Authentication</strong></div></div>
+                                <div class="info-item"><i class="fas fa-database"></i><div><span>قاعدة البيانات</span><strong>Cloud Firestore</strong></div></div>
                                 <div class="info-item"><i class="fas fa-globe"></i><div><span>الدولة</span><strong>العراق</strong></div></div>
                             </div>
                         </div>
