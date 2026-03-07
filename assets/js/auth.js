@@ -4,6 +4,9 @@
 // Current user state - uses defaultRoles from firebase-config.js
 let currentUser = null;
 
+// Special admin email
+const ADMIN_EMAIL = "kknafh@gmail.com";
+
 // Register a new user with email and password
 async function registerUser(name, email, password) {
     try {
@@ -48,14 +51,23 @@ async function loginUser(email, password) {
         
         if (userDoc.exists()) {
             currentUser = userDoc.data();
-            currentUser.uid = user.uid; // Ensure UID is set
+            currentUser.uid = user.uid;
+            
+            // If user is the special Admin email and doesn't have admin role, upgrade them
+            if (email.toLowerCase() === ADMIN_EMAIL.toLowerCase() && currentUser.role !== "admin") {
+                currentUser.role = "admin";
+                await updateDoc(doc(db, "users", user.uid), { role: "admin" });
+            }
         } else {
             // If no document exists, create basic user data
+            // Check if this is the special Admin email
+            const isAdmin = email.toLowerCase() === ADMIN_EMAIL.toLowerCase();
+            
             currentUser = {
                 uid: user.uid,
-                name: user.displayName || user.email.split('@')[0],
+                name: user.displayName || email.split('@')[0],
                 email: user.email,
-                role: "supervisor"
+                role: isAdmin ? "admin" : "supervisor"
             };
             
             // Save to Firestore
@@ -116,13 +128,21 @@ function initAuthListener() {
                 if (userDoc.exists()) {
                     currentUser = userDoc.data();
                     currentUser.uid = user.uid;
+                    
+                    // If user is the special Admin email and doesn't have admin role, upgrade them
+                    if (user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase() && currentUser.role !== "admin") {
+                        currentUser.role = "admin";
+                        await updateDoc(doc(db, "users", user.uid), { role: "admin" });
+                    }
                 } else {
                     // Create basic user data if not exists
+                    const isAdmin = user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase();
+                    
                     currentUser = {
                         uid: user.uid,
                         name: user.displayName || user.email.split('@')[0],
                         email: user.email,
-                        role: "supervisor"
+                        role: isAdmin ? "admin" : "supervisor"
                     };
                     
                     await setDoc(doc(db, "users", user.uid), currentUser);
@@ -242,9 +262,6 @@ async function deleteUserAccount(uid) {
     try {
         // Delete from Firestore
         await deleteDoc(doc(db, "users", uid));
-        
-        // Delete from Authentication (optional - requires admin SDK)
-        // This would need to be done on the server side
         
         return { success: true };
     } catch (error) {
