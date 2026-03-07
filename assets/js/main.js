@@ -253,6 +253,18 @@ function checkAuth() {
     return false;
 }
 
+// Logout function - calls Firebase logout
+function logout() {
+    if (typeof logoutUser === 'function') {
+        logoutUser();
+    } else {
+        // Fallback if Firebase auth not available
+        currentUser = null;
+        localStorage.removeItem('raasidCurrentUser');
+        location.reload();
+    }
+}
+
 // Apply permissions to UI
 function applyPermissions() {
     const perms = getUserPermissions(currentUser.role);
